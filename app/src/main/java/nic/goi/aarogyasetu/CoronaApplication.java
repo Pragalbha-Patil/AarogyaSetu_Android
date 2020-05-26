@@ -57,6 +57,13 @@ public class CoronaApplication extends Application implements Configuration.Prov
     {
         return lastKnownLocation;
     }
+    
+    /* Check for Mock locations to avoid misleading data */
+    public static boolean checkForMockLocation(Context context) {    
+    if (Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ALLOW_MOCK_LOCATION).equals("0"))
+        return false; // not using mock location
+    else
+        return true; // USING MOCK LOCATION
 
     public Location getDeviceLastKnownLocation() {
 
@@ -67,14 +74,14 @@ public class CoronaApplication extends Application implements Configuration.Prov
             for (String provider : providers) {
                 try {
                     Location l = mLocationManager.getLastKnownLocation(provider);
-                    if (l == null) {
+                    if (l == null && checkForMockLocation == false ) {
                         continue;
                     }
                     if (lastKnownLocation == null || l.getAccuracy() > lastKnownLocation.getAccuracy()) {
                         lastKnownLocation = l;
                     }
                 }catch (SecurityException e){
-
+                    // either device is using mock location
                 }
             }
         }
